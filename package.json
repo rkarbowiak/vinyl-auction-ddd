@@ -1,0 +1,22 @@
+{
+  "name": "ddd-vinyl-shop",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test  --coverage"
+  },
+  "dependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.13",
+    "bun-types": "^1.2.13"
+  },
+  "module": "index.ts",
+  "type": "module",
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
