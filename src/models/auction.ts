@@ -1,5 +1,6 @@
 import { AggregateRoot } from "../events/aggragate-root";
 import { AuctionFinishedEvent } from "../events/events/auction-finished";
+import { BidPlacedEvent } from "../events/events/bid-placed";
 import { Result } from "../result";
 import { Bid } from "./bid";
 
@@ -42,7 +43,13 @@ export class Auction extends AggregateRoot<{}> {
       return Result.fail("Seller cannot bid on their own auction");
     }
 
+    const lastBid = this.bids.at(-1);
+
     this.bids.push(bid);
+
+    this.addDomainEvent(
+      new BidPlacedEvent(this.id, bid.bidderId, lastBid?.bidderId),
+    );
 
     return Result.ok(bid);
   }
