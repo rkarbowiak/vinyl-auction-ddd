@@ -1,14 +1,21 @@
+import { AggregateRoot } from "../events/aggragate-root";
+import { AuctionFinishedEvent } from "../events/events/auction-finished";
+import { Result } from "../result";
 import { Bid } from "./bid";
 
-export class Auction {
+export class Auction extends AggregateRoot<{}> {
   private status: "open" | "closed" = "open";
 
   constructor(
-    private id: string,
+    id: string,
     private endDate: Date,
     private startingPrice: number,
+    private sellerId: string,
+    private vinylId: string,
     private bids: Bid[] = [],
   ) {
+    super(id);
+
     if (this.startingPrice <= 0) {
       throw new Error("Starting price must be greater than zero.");
     }
@@ -18,47 +25,72 @@ export class Auction {
     }
   }
 
-  placeBid(bid: Bid) {
-    if (bid.amount <= this.getCurrentPrice()) {
-      throw new Error("Bid amount must be higher than the current price.");
+  placeBid(bid: Bid): Result<Bid> {
+    if (bid.amount <= this.getCurrentPrice().getValue()) {
+      return Result.fail("Bid amount must be higher than the current price.");
     }
 
     if (bid.date > this.endDate) {
-      throw new Error("Bid date must be within the auction period.");
+      return Result.fail("Bid date must be within the auction period.");
+    }
+
+    if (this.status !== "open") {
+      return Result.fail("Auction is not open");
+    }
+
+    if (this.sellerId === bid.bidderId) {
+      return Result.fail("Seller cannot bid on their own auction");
     }
 
     this.bids.push(bid);
+
+    return Result.ok(bid);
   }
 
-  finishAuction() {
+  finish(): Result<Auction> {
     if (this.status !== "open") {
-      throw new Error("Auction is not open.");
+      return Result.fail("Auction is not open.");
     }
 
-    if (this.endDate < new Date()) {
-      this.status = "closed";
-    } else {
-      throw new Error("Auction is not finished yet.");
+    if (this.endDate > new Date()) {
+      return Result.fail("Auction is not finished yet.");
     }
 
     this.status = "closed";
+
+    this.addDomainEvent(
+      new AuctionFinishedEvent(
+        this.id,
+        this.vinylId,
+        this.sellerId,
+        this.getCurrentBid().getValue().bidderId,
+      ),
+    );
+
+    return Result.ok(this);
   }
 
-  getCurrentBid(): Bid | undefined {
-    return this.bids.at(-1);
+  getCurrentBid(): Result<Bid> {
+    return Result.ok(this.bids.at(-1));
   }
 
-  getCurrentPrice(): number {
-    return this.bids.length > 0
-      ? this.bids[this.bids.length - 1].amount
-      : this.startingPrice;
+  getCurrentPrice(): Result<number> {
+    return Result.ok(
+      this.bids.length > 0
+        ? this.bids[this.bids.length - 1].amount
+        : this.startingPrice,
+    );
+  }
+
+  isFinished() {
+    return this.status === "closed";
   }
 
   getBids(): Bid[] {
     return this.bids;
   }
 
-  getId(): string {
+  getId(): String {
     return this.id;
   }
 
@@ -68,5 +100,13 @@ export class Auction {
 
   getStatus(): "open" | "closed" | "planned" {
     return this.status;
+  }
+
+  getSellerId(): string {
+    return this.sellerId;
+  }
+
+  getVinylId(): string {
+    return this.vinylId;
   }
 }

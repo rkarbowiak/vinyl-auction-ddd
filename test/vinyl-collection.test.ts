@@ -126,7 +126,26 @@ describe("vinyl collection", () => {
     const updatedVinyl = collection.getVinylById(vinyl.getId());
 
     expect(updatedVinyl).toBeDefined();
-    expect(updatedVinyl?.getTitle()).toBe("Paradise City");
-    expect(updatedVinyl?.getArtist()).toBe("Guns N' Roses");
+    expect(updatedVinyl.getValue().getTitle()).toBe("Paradise City");
+    expect(updatedVinyl.getValue().getArtist()).toBe("Guns N' Roses");
+  });
+
+  it("should not update vinyl information if vinyl is not found", () => {
+    const collection = new VinylCollection();
+    const vinyl = new Vinyl(
+      crypto.randomUUID(),
+      "Sweet Child O' Mine",
+      "Guns N' Roses",
+    );
+
+    collection.addVinyl(vinyl);
+
+    const response = collection.updateVinyl(crypto.randomUUID(), {
+      title: "Paradise City",
+      artist: "Guns N' Roses",
+    });
+
+    expect(response.isFailure).toBe(true);
+    expect(response.getError()).toBe("Vinyl not found");
   });
 });
