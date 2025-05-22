@@ -64,16 +64,6 @@ export class Auction extends AggregateRoot<{}> {
     }
 
     this.status = "closed";
-
-    this.addDomainEvent(
-      new AuctionFinishedEvent(
-        this.id,
-        this.vinylId,
-        this.sellerId,
-        this.getCurrentBid().getValue().bidderId,
-      ),
-    );
-
     return Result.ok(this);
   }
 
