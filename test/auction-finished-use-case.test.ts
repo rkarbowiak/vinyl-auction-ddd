@@ -30,6 +30,7 @@ describe("Auction End-to-End Flow", () => {
     const vinylId = "vinyl-1";
     const sellerId = "seller-1";
     const buyerId = "buyer-1";
+    const auctionId = "auction-1";
 
     const sellerCollection = new VinylCollection("seller-collection");
     sellerCollection.setId(sellerId);
@@ -43,15 +44,14 @@ describe("Auction End-to-End Flow", () => {
 
     sellerCollection.addVinyl(vinyl);
 
-    const buyerCollection = new VinylCollection("buyer-collection");
-    buyerCollection.setId(buyerId);
+    const buyerCollection = new VinylCollection(buyerId);
 
     await vinylCollectionRepo.save(sellerCollection);
     await vinylCollectionRepo.save(buyerCollection);
 
     const auctionEndDate = new Date("2023-11-02T23:59:59Z");
     const auction = new Auction(
-      "auction-123",
+      auctionId,
       auctionEndDate,
       100,
       sellerId,
@@ -66,24 +66,19 @@ describe("Auction End-to-End Flow", () => {
 
     setSystemTime(new Date("2023-11-03T00:00:00Z"));
     const result = await finishAuctionUseCase.execute({
-      auctionId: "auction-123",
+      auctionId: auctionId,
     });
 
     expect(result.isSuccess).toBe(true);
-    const finishedAuction = await auctionRepo.getById("auction-123");
+
+    const finishedAuction = await auctionRepo.getById(auctionId);
+    const updatedSellerCollection = await vinylCollectionRepo.getById(sellerId);
+    const updatedBuyerCollection = await vinylCollectionRepo.getById(buyerId);
 
     expect(finishedAuction).toBeDefined();
     expect(finishedAuction?.isFinished()).toBe(true);
-
-    const updatedSellerCollection = await vinylCollectionRepo.getByUserId(
-      sellerId,
-    );
-    const updatedBuyerCollection = await vinylCollectionRepo.getByUserId(
-      buyerId,
-    );
-
-    expect(updatedBuyerCollection?.getVinyls().length).toBe(1);
     expect(updatedSellerCollection?.getVinyls().length).toBe(0);
+    expect(updatedBuyerCollection?.getVinyls().length).toBe(1);
     expect(updatedBuyerCollection?.getVinyls()[0].getId()).toBe("vinyl-1");
   });
 });

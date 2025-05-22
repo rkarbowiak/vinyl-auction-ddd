@@ -47,13 +47,9 @@ export class FinishAuctionUseCase {
       throw new Error("Auction is not finished");
     }
 
-    const sellerCollection = await this.vinylCollectionRepo.getByUserId(
-      sellerId,
-    );
+    const sellerCollection = await this.vinylCollectionRepo.getById(sellerId);
 
-    const winnerCollection = await this.vinylCollectionRepo.getByUserId(
-      winnerId,
-    );
+    const winnerCollection = await this.vinylCollectionRepo.getById(winnerId);
 
     if (!sellerCollection || !winnerCollection) {
       throw new Error("Vinyl collection not found");
@@ -93,7 +89,7 @@ export class FinishAuctionUseCase {
 
     await this.auctionRepo.save(auction);
 
-    DomainEvents.dispatchEventsForAggregate(request.auctionId);
+    await DomainEvents.dispatchEventsForAggregate(request.auctionId);
 
     return Result.ok<void>();
   }

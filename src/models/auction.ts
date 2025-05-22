@@ -4,7 +4,7 @@ import { BidPlacedEvent } from "../events/events/bid-placed";
 import { Result } from "../result";
 import { Bid } from "./bid";
 
-export class Auction extends AggregateRoot<{}> {
+export class Auction extends AggregateRoot<Auction> {
   private status: "open" | "closed" = "open";
 
   constructor(

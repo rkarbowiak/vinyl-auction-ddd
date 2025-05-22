@@ -2,7 +2,7 @@ import { Auction } from "../models/auction";
 import { VinylCollection } from "../models/vinyl-collection";
 
 export interface VinylCollectionRepository {
-  getByUserId(userId: String): Promise<VinylCollection | undefined>;
+  getById(userId: String): Promise<VinylCollection | undefined>;
   save(collection: VinylCollection): Promise<void>;
 }
 

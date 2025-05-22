@@ -1,8 +1,11 @@
+import { AggregateRoot } from "../events/aggragate-root";
 import { Result } from "../result";
 import { Vinyl } from "./vinyl";
 
-export class VinylCollection {
-  constructor(private id: string = crypto.randomUUID()) {}
+export class VinylCollection extends AggregateRoot<VinylCollection> {
+  constructor(id: string = crypto.randomUUID()) {
+    super(id);
+  }
 
   private vinyls: Vinyl[] = [];
 

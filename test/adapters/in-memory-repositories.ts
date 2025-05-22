@@ -26,10 +26,9 @@ export class InMemoryVinylCollectionRepository
 {
   private collections: Map<string, VinylCollection> = new Map();
 
-  async getByUserId(userId: string): Promise<VinylCollection | undefined> {
-    // Find the first collection for this user
+  async getById(id: string): Promise<VinylCollection | undefined> {
     for (const collection of this.collections.values()) {
-      if (collection.getId() === userId) {
+      if (collection.getId() === id) {
         return collection;
       }
     }

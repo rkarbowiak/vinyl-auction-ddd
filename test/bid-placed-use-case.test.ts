@@ -35,11 +35,7 @@ describe("Auction End-to-End Flow", () => {
     vinylCollectionRepo = new InMemoryVinylCollectionRepository();
     notificationService = new SendNotificationAdapter();
 
-    bidPlacedUseCase = new BidPlacedUseCase(
-      auctionRepo,
-      vinylCollectionRepo,
-      notificationService,
-    );
+    bidPlacedUseCase = new BidPlacedUseCase(auctionRepo, notificationService);
     bidPlacedUseCase.setupSubscriptions();
 
     finishAuctionUseCase = new FinishAuctionUseCase(

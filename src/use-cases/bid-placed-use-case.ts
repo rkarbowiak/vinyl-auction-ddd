@@ -12,16 +12,13 @@ import { Result } from "../result";
 
 export class BidPlacedUseCase {
   private auctionRepo: AuctionRepository;
-  private vinylCollectionRepo: VinylCollectionRepository;
   private notificationService: NotificationService;
 
   constructor(
     auctionRepo: AuctionRepository,
-    vinylCollectionRepo: VinylCollectionRepository,
     notificationService: NotificationService,
   ) {
     this.auctionRepo = auctionRepo;
-    this.vinylCollectionRepo = vinylCollectionRepo;
     this.notificationService = notificationService;
   }
 
@@ -65,7 +62,7 @@ export class BidPlacedUseCase {
 
     await this.auctionRepo.save(auction);
 
-    DomainEvents.dispatchEventsForAggregate(request.auctionId);
+    await DomainEvents.dispatchEventsForAggregate(request.auctionId);
 
     return Result.ok<void>();
   }

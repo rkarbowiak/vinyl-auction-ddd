@@ -13,19 +13,22 @@ export class DomainEvents {
     }
   }
 
-  public static dispatchEventsForAggregate(id: String): void {
+  public static async dispatchEventsForAggregate(id: String): Promise<void> {
     const aggregate = this.findMarkedAggregateByID(id);
     if (aggregate) {
-      this.dispatchAggregateEvents(aggregate);
+      await this.dispatchAggregateEvents(aggregate);
       aggregate.clearEvents();
       this.removeAggregateFromMarkedDispatchList(aggregate);
     }
   }
 
-  private static dispatchAggregateEvents(aggregate: AggregateRoot<any>): void {
-    aggregate.getDomainEvents().forEach((event: DomainEvent) => {
-      this.dispatch(event);
-    });
+  private static async dispatchAggregateEvents(
+    aggregate: AggregateRoot<any>,
+  ): Promise<void> {
+    const events = aggregate.getDomainEvents();
+    for (const event of events) {
+      await this.dispatch(event);
+    }
   }
 
   private static removeAggregateFromMarkedDispatchList(
@@ -51,12 +54,12 @@ export class DomainEvents {
     this.handlers.get(eventName)!.push(callback);
   }
 
-  public static dispatch(event: DomainEvent): void {
+  public static async dispatch(event: DomainEvent): Promise<void> {
     const eventClassName = event.constructor.name;
     if (this.handlers.has(eventClassName)) {
       const handlers = this.handlers.get(eventClassName)!;
       for (const handler of handlers) {
-        handler(event);
+        await handler(event);
       }
     }
   }
